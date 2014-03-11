@@ -4,6 +4,8 @@ class Album
 
 	field :title
 	field :url
+  field :widget_url
+  field :upload_time
 
 	has_many :beauties
 end
