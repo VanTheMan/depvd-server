@@ -37,15 +37,19 @@ class Crawl
     response = Net::HTTP.post_form(URI.parse('http://www.depvd.com/pajax/topic/list/' + tag), params)
     content = JSON.parse(response.body)
     lac = content['lac']
-    content['topics'].each do |topic|
-      title = topic['title']
-      album_url = 'http://www.depvd.com/' + topic['viewUrl']
-      widget_url = 'http://www.depvd.com/' + topic['widgetImage']
-      upload_time = topic['creationTimeString']
-      @album = Album.create!(title: title, url: album_url, widget_url: widget_url, upload_time: upload_time, tag: tag)
-      puts "Craw album #{@album.title} #{@album.url}"
+    if content['topics']
+      content['topics'].each do |topic|
+        title = topic['title']
+        album_url = 'http://www.depvd.com/' + topic['viewUrl']
+        widget_url = 'http://www.depvd.com/' + topic['widgetImage']
+        upload_time = topic['creationTimeString']
+        @album = Album.create!(title: title, url: album_url, widget_url: widget_url, upload_time: upload_time, tag: tag)
+        puts "Craw album #{@album.title} #{@album.url}"
+      end
+      return lac
+    else
+      return nil
     end
-    return lac
   end
 
 	def self.crawl_from_tag(tag)
@@ -58,7 +62,7 @@ class Crawl
       else
         previous_lac = lac
         lac = Crawl.get_album_from_json(tag, lac, i)
-        if lac == previous_lac
+        if !lac
           return
         end
       end
