@@ -6,10 +6,12 @@ gem 'rails'
 
 gem 'mongoid', github: 'mongoid/mongoid'
 gem 'bson_ext'
+gem 'mongoid-cached-json'
 
 gem 'nokogiri'
 gem 'pry'
 gem 'faraday'
+gem 'kaminari'
 
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.0'

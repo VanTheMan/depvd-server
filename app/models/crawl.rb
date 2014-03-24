@@ -19,16 +19,23 @@ class Crawl
       album_url = element.css('a').attr('href').value
       widget_url = element.css('img').attr('src').value
       upload_time = element.css('.vd-user').css('span').text.gsub(", ","")
-      Album.create!(title: title, url: album_url, widget_url: widget_url, upload_time: upload_time, tag: tag)
+      if Album.where(url: album_url, tag: tag).first 
+        return nil
+      else
+        Album.create!(title: title, url: album_url, widget_url: widget_url, upload_time: upload_time, tag: tag)
+      end
     end
   end
 
   def self.crawl_photo_from_album(url)
-    doc = Nokogiri::HTML(open('url'))
-    @album = Album.where(url: url).first
+    doc = Nokogiri::HTML(open(url))
+    @albums = Album.where(url: url)
     doc.css('.item').each do |element|
       link = element.css('img').attr('data-original').value
-      @album.beauties.create!(url: link)
+      @albums.each do |album|
+        @photo = album.beauties.create!(url: link)
+      end
+      puts "Crawl photo #{@albums.first.title} #{@photo.url}"
     end    
   end
 
@@ -44,7 +51,7 @@ class Crawl
         widget_url = 'http://www.depvd.com/' + topic['widgetImage']
         upload_time = topic['creationTimeString']
         @album = Album.create!(title: title, url: album_url, widget_url: widget_url, upload_time: upload_time, tag: tag)
-        puts "Craw album #{@album.title} #{@album.url}"
+        puts "Crawl album #{@album.title} #{@album.url}"
       end
       return lac
     else
@@ -57,11 +64,17 @@ class Crawl
     lac = Crawl.get_lac(tag)
     9999.times do |i|
       if @firstCrawl
-        Crawl.crawl_first_albums(tag)
-        @firstCrawl = false
+        if Crawl.crawl_first_albums(tag)
+          @firstCrawl = false
+        else
+          return
+        end
       else
         previous_lac = lac
         lac = Crawl.get_album_from_json(tag, lac, i)
+        if ( i == 22 && tag == 'us-uk')
+          return
+        end
         if !lac
           return
         end

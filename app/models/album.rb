@@ -1,6 +1,7 @@
 class Album
 	include Mongoid::Document
 	include Mongoid::Timestamps
+  include Album::Json
 
 	field :title
 	field :url
